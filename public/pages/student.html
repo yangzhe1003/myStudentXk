@@ -1,0 +1,195 @@
+<h3>学生信息管理</h3>
+<hr>
+<input type="text" id='id'><button class="search">查找</button>
+
+<div class="table1">
+    <table>
+        <tbody>
+            <tr>
+                <th>编号</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>出生日期</th>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="table2" style="display:none">
+    <table>
+        <tbody>
+            <tr>
+                <th>编号</th>
+                <th>姓名</th>
+                <th>性别</th>
+                <th>出生日期</th>
+            </tr>
+            
+        </tbody>
+    </table>
+</div>
+
+<div class='option'>
+    <button class="add">添加</button>
+    <button class="alt">修改</button>
+    <button class="del">删除</button>    
+</div>
+
+<div class="addLog" style="display:none">
+    姓名: <input type="text" id="addname"> <br>
+    性别: <input type="text" id="addgender"> <br>
+    出生日期: <input type="text" id="addbirth"> <br>
+    <button class="yesAdd">确定</button>
+    <button class="noAdd">取消</button>
+</div>
+
+<div class="altLog" style="display:none">
+    ID: <input type="text" id="altid" disabled> <br>
+    姓名: <input type="text" id="altname"> <br>
+    性别: <input type="text" id="altgender"> <br>
+    出生日期: <input type="text" id="altbirth"> <br>
+    <button class="yesAlt">确定</button>
+    <button class="noAlt">取消</button>
+</div>
+
+
+<script>
+    function loadData(){
+        $('tbody').empty();
+        var newTr = 
+            '<tr>'
+                +'<th>编号</td>'
+                +'<td>姓名</td>'
+                +'<td>性别</td>'
+                +'<td>出生日期</td>'
+            +'</tr>';
+            $('.table1 tbody').append(newTr);
+            
+        $.getJSON('/student',function(data){
+            console.log(data);
+            data.forEach(function(item){
+                var newTr = 
+                '<tr>'
+                    +'<td><input type="checkbox" value="'+item.id+'">&nbsp;&nbsp;'+item.id+'</td>'
+                    +'<td>'+item.name+'</td>'
+                    +'<td>'+item.gender+'</td>'
+                    +'<td>'+item.birth+'</td>'
+                +'</tr>';
+
+                $('.table1 tbody').append(newTr);
+            });
+        });
+    };
+    $(function(){
+        loadData();
+        //点击查找按钮
+        $('.search').on('click',function(){
+            $('tbody').empty();
+            var newTr = 
+                '<tr>'
+                    +'<th>编号</td>'
+                    +'<td>姓名</td>'
+                    +'<td>性别</td>'
+                    +'<td>出生日期</td>'
+                +'</tr>';
+            $('.table2 tbody').append(newTr);
+            var id = $('#id').val();
+            $('.table1').css('display','none');
+            $('.table2').css('display','block');  
+            $('.table2 tr').eq(1).remove();      
+            $.getJSON('/student/findById?id='+id,function(data){
+                data.forEach(function(item){
+                    var newTr = 
+                    '<tr>'
+                        +'<td><input type="checkbox" value="'+item.id+'">&nbsp;&nbsp;'+item.id+'</td>'
+                        +'<td>'+item.name+'</td>'
+                        +'<td>'+item.gender+'</td>'
+                        +'<td>'+item.birth+'</td>'
+                    +'</tr>';
+
+                    $('.table2 tbody').append(newTr);
+                });
+            })
+        });
+
+        //点击删除按钮
+        $('.del').on('click',function(){
+            var ids = $('tbody input:checkbox:checked').map(function(index,item){
+                return $(item).val();
+            }).toArray();
+
+            $.ajax({
+                url:'/student/deleteById',
+                data:JSON.stringify(ids),
+                method:'post',
+                contentType:'application/json',
+                success:function(data){
+                    alert(data);
+                }
+            });
+            loadData();
+        });
+
+        //点击添加按钮
+        $('.add').on('click',function(){
+            $('.addLog').css('display','block');
+        });
+
+        //点击确定按钮
+        $('.yesAdd').on('click',function(){
+            var name = $('#addname').val();
+            var gender = $('#addgender').val();
+            var birth = $('#addbirth').val();
+
+            $('#addname').val('');
+            $('#addgender').val('');
+            $('#addbirth').val('');
+            $('.addLog').css('display','none');
+            $.getJSON('/student/save?name='+name+'&gender='+gender+'&birth='+birth,function(){});
+            loadData();
+        });
+        //点击取消按钮
+        $('.noAdd').on('click',function(){
+            $('#addname').val('');
+            $('#addgender').val('');
+            $('#addbirth').val('');
+            $('.addLog').css('display','none');
+        });
+
+        //点击修改按钮
+        $('.alt').on('click',function(){
+            var id = $('tbody input:checkbox:checked');
+            if(id.length == 1){
+                $('.altLog').css('display','block');
+                $.getJSON('/student/findById?id='+id.val(),function(data){
+                    data.forEach(function(item){
+                        $('#altid').val(item.id);
+                        $('#altname').val(item.name);
+                        $('#altgender').val(item.gender);
+                        $('#altbirth').val(item.birth.slice(2,10));
+                    });
+                });
+            }
+        });
+
+        //点击确定修改
+        $('.yesAlt').on('click',function(){
+            var id = $('#altid').val();
+            var name = $('#altname').val();
+            var gender = $('#altgender').val();
+            var birth = $('#altbirth').val();
+            $.getJSON('/student/alt?id='+id+'&name='+name+'&gender='+gender+'&birth='+birth,function(){});
+            $('.noAlt').trigger('click');     
+            loadData();
+        });
+
+        //点击取消修改
+        $('.noAlt').on('click',function(){
+            $('#altname').val('');
+            $('#altgender').val('');
+            $('#altbirth').val('');
+            $('.altLog').css('display','none');
+        });
+
+    });
+</script>

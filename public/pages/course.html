@@ -1,0 +1,73 @@
+<h3>课程信息管理</h3>
+<hr>
+<input type="text" name="id" id="id"><button class="search">查找</button>
+<div class="table1">
+    <table>
+        <tbody>
+            <tr>
+                <th>编号</th>
+                <th>课程名</th>
+                <th>学分</th>
+            </tr>
+            
+        </tbody>
+    </table>
+</div>
+
+<div class="table2" style="display:none">
+    <table>
+        <tbody>
+            <tr>
+                <th>编号</th>
+                <th>课程名</th>
+                <th>学分</th>
+            </tr>
+            
+        </tbody>
+    </table>
+</div>
+
+<div class='option'>
+    <button class="add">添加</button>
+    <button class="alt">修改</button>
+    <button class="del">删除</button>    
+</div>
+
+<script>
+    $(function(){
+        //$.post
+        $.getJSON('/course',function(data){
+            data.forEach(function(item){
+                var newTr = 
+                '<tr>'
+                    +'<td><input type="checkbox" value="'+item.id+'">&nbsp;&nbsp;'+item.id+'</td>'
+                    +'<td>'+item.name+'</td>'
+                    +'<td>'+item.credit+'</td>' 
+                +'</tr>';
+
+                $('.table1 tbody').append(newTr);
+            });
+        });
+        
+        $('.search').on('click',function(){
+            $('.table1').css('display','none');
+            $('.table2').css('display','block');
+            $('.table2 tr').eq(1).remove();
+            var id = $('#id').val();            
+            $.getJSON('/course/findById?id='+id,function(data){
+                data.forEach(function(item){
+                    var newTr = 
+                    '<tr>'
+                        +'<td><input type="checkbox" value="'+item.id+'">&nbsp;&nbsp;'+item.id+'</td>'
+                        +'<td>'+item.name+'</td>'
+                        +'<td>'+item.credit+'</td>'                    
+                    +'</tr>';
+
+                    $('.table2 tbody').append(newTr);
+                });
+            });
+            
+        });
+
+    });
+</script>

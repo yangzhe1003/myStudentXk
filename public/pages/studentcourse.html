@@ -1,0 +1,83 @@
+<h3>选课信息管理</h3>
+<hr>
+<input type="text" id='id'><button class="search">查找</button>
+
+<div class="table1">
+    <table>
+        <tbody>
+            <tr>
+                <th>编号</th>
+                <th>成绩</th>
+                <th>学生ID</th>
+                <th>课程ID</th>
+            </tr>
+            
+        </tbody>
+    </table>
+</div>
+
+<div class="table2" style="display:none">
+    <table >
+        <tbody>
+            <tr>
+                <th>编号</th>
+                <th>成绩</th>
+                <th>学生ID</th>
+                <th>课程ID</th>
+            </tr>
+            
+        </tbody>
+    </table>
+</div>
+
+<div class='option'>
+    <button class="add">添加</button>
+    <button class="alt">修改</button>
+    <button class="del">删除</button>    
+</div>
+
+
+<script>
+    $(function(){
+        //$.post
+        $.getJSON('/studentcourse',function(data){
+            data.forEach(function(item){
+                var newTr = 
+                '<tr>'
+                    +'<td><input type="checkbox" value="'+item.id+'">&nbsp;&nbsp;'+item.id+'</td>'
+                    +'<td>'+item.grade+'</td>'
+                    +'<td>'+item.student_id+'</td>'
+                    +'<td>'+item.course_id+'</td>'
+                +'</tr>';
+
+                $('.table1 tbody').append(newTr);
+            });
+        })
+        
+    
+        //点击查找按钮
+        $('.search').on('click',function(){
+            var id = $('#id').val();
+            $('.table1').css('display','none');
+            $('.table2').css('display','block');  
+            $('.table2 tr').eq(1).remove();      
+            $.getJSON('/studentcourse/findById?id='+id,function(data){
+                data.forEach(function(item){
+                    var newTr = 
+                    '<tr>'
+                        +'<td><input type="checkbox" value="'+item.id+'">&nbsp;&nbsp;'+item.id+'</td>'
+                        +'<td>'+item.grade+'</td>'
+                        +'<td>'+item.student_id+'</td>'
+                        +'<td>'+item.course_id+'</td>'
+                    +'</tr>';
+
+                    $('.table2 tbody').append(newTr);
+                });
+            })
+        });
+        //点击删除按钮
+        $('.del').on('click',function(){
+                
+        });
+    });
+</script>
